@@ -15,6 +15,9 @@ const resolvers = require('./graphql/resolvers')//получаем преобр�
 //создаём новый экземпляр/инстанс от класса PubSub
 const pubSub = new PubSub()
 
+//получим порт из окружения
+const PORT = process.env.PORT || 5000
+
 //создаём экземпляр аполло-сервера 
 //и указываем какие сущьности он будет обрабатывать
 const server = new ApolloServer({
@@ -34,7 +37,7 @@ mongoose.connect(MONGODB, {
    //создаём слушателя на изменения для сервера
    .then(() => {
       console.log('Mongodb connected')
-      return server.listen({port: 5000})
+      return server.listen({port: PORT})
    })
    .then(res => {
       console.log(`server runing at ${res.url}`)
