@@ -1,0 +1,46 @@
+const { ApolloServer, PubSub } = require('apollo-server')//подключаем Аполло сервер, класс PubSub для реализации подписок
+// const gql = require('graphql-tag')//для создания строковых шаблонов для graphql
+const mongoose = require('mongoose')//для связи с mongodb
+// const config = require('config')
+//получаем порт из config и если он не определён в конфиге - пусть по умолчанию он 5000
+// const PORT = config.get('port') || 5000
+const { MONGODB } = require('./config/default');
+
+//
+
+const typeDefs = require('./graphql/typeDefs')//импортируем 
+// const Post = require('./models/Post')
+const resolvers = require('./graphql/resolvers')//получаем преобразователи из папки resolvers/ файл - index(не пишем т.к. index читается по умолчанию)
+
+//создаём новый экземпляр/инстанс от класса PubSub
+const pubSub = new PubSub()
+
+//создаём экземпляр аполло-сервера 
+//и указываем какие сущьности он будет обрабатывать
+const server = new ApolloServer({
+   typeDefs,
+   resolvers,
+   //сущьность контекста: запросы, подписки
+   context: ({ req }) => ({ req, pubSub })
+})
+
+//инициируем подключение к БД.
+//параметром будет строка полученная из облачного сервиса-кластера 
+mongoose.connect(MONGODB, {
+   useNewUrlParser: true,
+   useUnifiedTopology: true,
+   // useCreateIndex: true
+})
+   //создаём слушателя на изменения для сервера
+   .then(() => {
+      console.log('Mongodb connected')
+      return server.listen({port: 5000})
+   })
+   .then(res => {
+      console.log(`server runing at ${res.url}`)
+   })
+   .catch(err => {
+      console.error(err)
+   })
+
+
