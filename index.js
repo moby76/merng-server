@@ -27,6 +27,7 @@ const server = new ApolloServer({
    context: ({ req }) => ({ req, pubSub })
 })
 
+
 //инициируем подключение к БД.
 //параметром будет строка полученная из облачного сервиса-кластера 
 mongoose.connect(MONGODB, {
