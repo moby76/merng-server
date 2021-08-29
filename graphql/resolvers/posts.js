@@ -1,3 +1,6 @@
+//Разрешители/распознаватели для Постов
+// -- Используются методы mongoose (https://mongoosejs.com/docs/api/model.html)
+
 //получим модель для постов из папки с моделями
 const Post = require('../../models/Post')
 
@@ -13,13 +16,13 @@ const { UserInputError } = require('apollo-server')
 
 //создаём резольверы (функции-преобразователи) согласно названиям мутаций в файле typeDefs
 module.exports = {
-   //создаём запросы для постов
+   
    Query: {
       //реализация запроса getPosts(получения ВСЕХ постов)
       async getPosts() {
          try {
             //получит все посты и отсортировать их по дате создания(по убыванию (-1))
-            const posts = await Post.find().sort({ createdAt: -1 })
+            const posts = await Post.find({}).sort({ createdAt: -1 })
             return posts
          } catch (error) {
             throw new Error(error)
@@ -46,23 +49,23 @@ module.exports = {
    //добавляем мутации для постов
    Mutation: {
       //Создать мутацию для создания поста - возможность добавления поста пользователем
-      async createPost(_, { body }, context) {
-         //создать константу = утилита проверки соответствия пользователя с передачей в неё контекста из аполло сервера в качестве аргумента параметра 
+      async createPost(_, { postInput: { body }}, context) {
+         //создать константу = утилитой проверки соответствия пользователя с передачей в неё контекста из аполло сервера в качестве аргумента параметра 
          const user = checkAuth(context)
          // console.log(user)
 
          //реализуем проверку
-         if(body.trim() === ''){//если body(без пробелов в начале и конце) - это пустая строка
+         if(body.trim() === ''){//если body(без пробелов в начале и конце) - это пустая строка то:
             throw new Error('Post-body must not be empty')//тело поста не должно быть пустым
          }
 
          //если проверка пройдена успешно то:
-         //создати новый пост используя модель описанную в файле Post(в моделях)
+         //создать новый пост используя модель описанную в файле Post(в моделях)
          //передав туда только те параметры на которые будет применено воздействие
-         const newPost = new Post({
-            body,//тело поста
-            user: user.id,//пользователь(будет определяться по ID)
-            userName: user.userName,
+         const newPost = await new Post({
+            body: body,//тело поста
+            user: user.id,//id пользователя для ссылочного поля user(будет определяться по ID пользователя из утилиты checkAuth)
+            userName: user.userName,//имя пользователя присваивается от имени пользователя полученного из утилиты checkAuth
             createdAt: new Date().toISOString()
          })
 
@@ -80,18 +83,35 @@ module.exports = {
          //и в конце вернуть этот пост
          return post
       },
+      //Создать мутацию для обновления поста
+      async updatePost(_, {postId, body}, context, info){       
+         const post = await Post.findByIdAndUpdate( postId, {body}, {new: true})
+         return post
+         // const {userName} = checkAuth(context)
+         // try {
+         //    const postUpdate = await Post.findById(postId)
+         //    if (userName === post.userName){
+         //       await postUpdate.update(postId, {body}, {new: true})
+         //    }
+         //    return postUpdate
+         // } catch (err) {
+         //    throw new Error(err)
+         // }
+         // const postUpdate = 
+         
+      },
       //Создать мутацию для удаления поста
       async deletePost(_, { postId }, context) {
          //
-         const user = checkAuth(context)
+         const {userName} = checkAuth(context)
 
          //пост может удалять только пользователь создавший его
          try {
             const post = await Post.findById(postId)
             //должно быть выполнено условие что совпадают имя пользователя и имя пользователя создавшего пост
-            if (user.userName === post.userName) {
+            if (userName === post.userName) {
                //тогда выполняем удаление
-               await post.delete()
+               await post.remove()// или post.delete()
                //и выводим сообщение об успешном удалении поста
                return 'Post deleted successfully'
             } else {//иначе если пользователь не тот который создал пост вернём ошибку
@@ -101,10 +121,11 @@ module.exports = {
             throw new Error(err)
          }
       },
-      //реализация создания/удаления лайков
+
+      //реализация создания/удаления лайков 
       async likePost(_, { postId }, context) {
 
-         //создание конст. для проверки пользователя из контекста на авторизацию по имени пользователя
+         //получить имя пользователя для проверки пользователя из контекста на авторизацию по имени пользователя
          const { userName } = checkAuth(context)
 
          //найти пост по id 
@@ -112,7 +133,7 @@ module.exports = {
 
          //если пост найден
          if (post) {
-            //убедиться что лайк создан пользователем путём сравнения пользователя из лайка и пользователя
+            //убедиться что лайк создан текущим пользователем путём сравнения пользователя из лайка и пользователя
             if (post.likes.find(like => like.userName === userName)) {
                //пост уже отмечен лайком, снять отметку
                //сначала перезаписать массив с лайками оставив только те что не принадлежат данному пользователю, тем самым он удалится из массива 
@@ -120,10 +141,10 @@ module.exports = {
                //сохраним пост
 
             } else {
-               //пост не отмечен лайком, поставить отметку
+               //пост не отмечен лайком, поставить отметку. Добавим в массив лайков через модель Post
                post.likes.push({
                   //и добавляем в нагрузку кто и когда создал лайк
-                  userName,
+                  userName,// присвоение имени пользователя текущего имени пользователя лайка
                   createdAt: new Date().toISOString()
                })
             }
