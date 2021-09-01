@@ -1,7 +1,7 @@
 //утилита выполняющая проверку пользователя на роль соответствия для разрешения редактировать посты
 
 //получим утилиту ошибок при идентификации из Аполло-сервера
-const { AuthenticationError } = require('apollo-server')
+const { AuthenticationError } = require('apollo-server-express')
 
 //подключаем  jsonwebtoken
 const jwt = require('jsonwebtoken')

@@ -8,11 +8,11 @@ const Post = require('../../models/Post')
 const checkAuth = require('../../utils/check-auth')
 
 //получим утилиту/подкласс ошибок при идентификации из Аполло-сервера
-const { AuthenticationError } = require('apollo-server')
+const { AuthenticationError, UserInputError } = require('apollo-server-express')
 
 //подключаем обработчик/подкласс ошибок для пользователей из пакета apollo-server-errors
 // Операция GraphQL включает недопустимое значение для аргумента поля.
-const { UserInputError } = require('apollo-server')
+// const { UserInputError } = require('apollo-server')
 
 //создаём резольверы (функции-преобразователи) согласно названиям мутаций в файле typeDefs
 module.exports = {
@@ -162,7 +162,7 @@ module.exports = {
 
          //создать подписку newPost
       newPost:{
-         // Функция подписки должна возвращать объект типа AsyncIterator, стандартный интерфейс для перебора асинхронных результатов.
+         // Функция подписки (subscribe) должна возвращать объект типа AsyncIterator, стандартный интерфейс для перебора асинхронных результатов.
          //параметры parent и аргументы в данном случае не понадобятся. только экземпляр от PubSub переданный через контеккст Аполло сервера
          subscribe: (_, __, { pubSub }) => pubSub.asyncIterator('NEW_POST')//создан новый тип подписки с названием NEW_POST
       }

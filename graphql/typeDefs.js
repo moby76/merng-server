@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server')//или можно использовать комментарий /* GraphQL */ после module.exports = 
+const { gql } = require('apollo-server-express')//или можно использовать комментарий /* GraphQL */ после module.exports = 
 
 //создать запрос на определение типов (types definitions)
 module.exports = gql`
@@ -51,6 +51,8 @@ module.exports = gql`
       getPosts: [Post]
       # получить 1 пост по id
       getPost(postId: ID!): Post
+      # получить всех пользователей
+      getUsers: [User]
    }
    # мутации(аналог post/delete/update-запросов в REST)
    type Mutation {

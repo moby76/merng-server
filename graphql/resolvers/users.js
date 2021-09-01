@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')//подключаем библиотеку bcryptjs
 const jwt = require('jsonwebtoken')//подключаем jsonwebtoken для регистрации
 const config = require('config')//подключаем конфиг для получения секрета
-const { UserInputError } = require('apollo-server')//подключаем обработчик ошибок для пользователей из пакета apollo-server-errors
+const { UserInputError } = require('apollo-server-express')//подключаем обработчик ошибок для пользователей из пакета apollo-server-errors
 // Операция GraphQL включает недопустимое значение для аргумента поля.
 
 //получаем валидатор validateRegisterInput и validateLoginInput из validators

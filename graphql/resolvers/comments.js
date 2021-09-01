@@ -5,10 +5,10 @@ const checkAuth = require('../../utils/check-auth')
 
 //подключаем обработчик ошибок для пользователей из пакета apollo-server-errors
 // Операция GraphQL включает недопустимое значение для аргумента поля.
-const { UserInputError } = require('apollo-server')
+const { AuthenticationError, UserInputError } = require('apollo-server-express')
 
 //получим утилиту ошибок при идентификации из Аполло-сервера
-const { AuthenticationError } = require('apollo-server')
+// const { AuthenticationError } = require('apollo-server')
 
 module.exports = {
    Mutation: {
