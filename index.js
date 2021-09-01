@@ -38,7 +38,7 @@ const app = express()
 //Затем, чтобы настроить серверы HTTP и WebSocket, нам нужно создать http.Server. 
 //Сделайте это, передав ваше приложение Express функции createServer, которую мы импортировали из 
 //модуля http:
-// const httpServer = createServer(app)
+const httpServer = createServer(app)
 
 //получим порт из окружения или создадим непосредственно здесь
 const PORT = process.env.PORT || 5000
@@ -60,15 +60,15 @@ async function startServer() {
       //и указываем какие сущьности он будет обрабатывать
       const server = new ApolloServer({
          schema,// (typeDefs, resolvers)
-         // plugins: [{
-         //    async serverWillStart() {//плагин закрывающий соединение по вебсокету при отключении основного сервера
-         //      return {
-         //        async drainServer() {
-         //          subscriptionServer.close();
-         //        }
-         //      };
-         //    }
-         //  }],
+         plugins: [{
+            async serverWillStart() {//плагин закрывающий соединение по вебсокету при отключении основного сервера
+              return {
+                async drainServer() {
+                  subscriptionServer.close();
+                }
+              };
+            }
+          }],
          //сущьность контекста: запросы, подписки
          context: ({ req }) => ({ req, pubSub })
       })
@@ -80,18 +80,18 @@ async function startServer() {
       server.applyMiddleware({ app })
 
       //создать сервер для подписки. будет использоваться посредством Вебсокета из пакета subscriptions-transport-ws'
-      // SubscriptionServer.create(
-      //    { 
-      //       schema,// (typeDefs, resolvers)
-      //       execute, 
-      //       subscribe// передать функцию подписки
-      //    },{ 
-      //       server: httpServer, //созданный раннее сервер для участия приложения в подписках const httpServer = createServer(app)
-      //       path: server.graphqlPath //путь в котором будет проходить сокет - наш основной сервер: const server = new ApolloServer
-      //    }
-      //  );
+      SubscriptionServer.create(
+         { 
+            schema,// (typeDefs, resolvers)
+            execute, 
+            subscribe// передать функцию подписки
+         },{ 
+            server: httpServer, //созданный раннее сервер для участия приложения в подписках const httpServer = createServer(app)
+            path: server.graphqlPath //путь в котором будет проходить сокет - наш основной сервер: const server = new ApolloServer
+         }
+       );
 
-      await new Promise(resolve => app.listen({ port: PORT }, resolve))
+      await new Promise(resolve => httpServer.listen({ port: PORT }, resolve))
       //ендпоинт для запросов 
       console.log(`Query endpoint ready at http://localhost:${PORT}${server.graphqlPath}`)
       //ендпоинт для подписок на вебсокете ws://localhost:ПОРТ/путь
