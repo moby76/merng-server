@@ -77,7 +77,7 @@ async function startServer() {
       await server.start()
 
       //сделать наше приложение Express как промежуточное ПО в нашем сервере (передать app в сервер)
-      server.applyMiddleware({ app })
+      server.applyMiddleware({ app, cors: false })
 
       //создать сервер для подписки. будет использоваться посредством Вебсокета из пакета subscriptions-transport-ws'
       SubscriptionServer.create(
@@ -99,19 +99,6 @@ async function startServer() {
    } catch (error) {
       console.log(error)
    }
-
-      //создаём слушателя на изменения для сервера
-   //    .then(() => {
-   //    console.log('Mongodb connected')
-   //    return server.listen({ port: PORT })
-   // })
-   //    .then(res => {
-   //       console.log(`server runing at ${res.url}`)
-   //    })
-   //    .catch(err => {
-   //       console.error(err)
-   //    })
-
 }
 
 startServer()
