@@ -91,7 +91,7 @@ async function startServer() {
          }
        );
 
-      await new Promise(resolve => httpServer.listen({ port: PORT }, resolve))
+      await new Promise(resolve => app.listen({ port: PORT }, resolve))
       //ендпоинт для запросов 
       console.log(`Query endpoint ready at http://localhost:${PORT}${server.graphqlPath}`)
       //ендпоинт для подписок на вебсокете ws://localhost:ПОРТ/путь
