@@ -77,7 +77,7 @@ async function startServer() {
       await server.start()
 
       //сделать наше приложение Express как промежуточное ПО в нашем сервере (передать app в сервер)
-      server.applyMiddleware({ app, cors: false })
+      server.applyMiddleware({ app, cors: true })
 
       //создать сервер для подписки. будет использоваться посредством Вебсокета из пакета subscriptions-transport-ws'
       SubscriptionServer.create(
