@@ -38,12 +38,14 @@ const app = express()
 
 //
 // app.use(cors())
-app.use(cors({ origin: 'https://merng-application.netlify.app/', credentials: true }))
+app.use(cors({ 
+   origin: 'https://merng-application.netlify.app/', 
+   credentials: true }))
 
 //Затем, чтобы настроить серверы HTTP и WebSocket, нам нужно создать http.Server. 
 //Сделайте это, передав ваше приложение Express функции createServer, которую мы импортировали из 
 //модуля http:
-const httpServer = createServer(app)
+const httpServer = createServer(app, cors())
 
 //получим порт из окружения или создадим непосредственно здесь
 const PORT = 5000
