@@ -41,7 +41,7 @@ const app = express()
 const httpServer = createServer(app)
 
 //получим порт из окружения или создадим непосредственно здесь
-const PORT = process.env.PORT || 5000
+const PORT = 5000
 
 //------ Создание функции запускающей сервер
 async function startServer() {
