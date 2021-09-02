@@ -8,7 +8,8 @@
   },
   "scripts": {
     "serve": "node index",
-    "start": "nodemon index"
+    "start": "node index",
+    "dev": "nodemon index"
   },
   "author": "Pavel Alyamovsky",
   "license": "ISC",
@@ -21,7 +22,6 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "graphql": "^15.5.1",
-    "graphql-playground-middleware-express": "^1.7.22",
     "graphql-subscriptions": "^1.2.1",
     "graphql-upload": "^12.0.0",
     "jsonwebtoken": "^8.5.1",
