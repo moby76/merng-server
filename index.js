@@ -3,6 +3,7 @@ const mongoose = require('mongoose')//для связи с mongodb
 const { ApolloServer } = require('apollo-server-express')//подключаем Аполло сервер, класс PubSub для реализации подписок
 const { Promise } = require('mongoose')
 const { ApolloServerPluginLandingPageGraphQLPlayground } = require('apollo-server-core')
+const cors = require('cors')
 
 //для управления подписками
 const { createServer } = require ('http')
@@ -34,6 +35,9 @@ const pubSub = new PubSub()
 
 //Для использования Express в начале надо создать объект, который будет представлять приложение
 const app = express()
+
+//
+app.use(cors())
 
 //Затем, чтобы настроить серверы HTTP и WebSocket, нам нужно создать http.Server. 
 //Сделайте это, передав ваше приложение Express функции createServer, которую мы импортировали из 
