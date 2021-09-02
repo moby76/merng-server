@@ -39,6 +39,8 @@ const app = express()
 //
 app.use(cors())
 
+app.get('/playground', expressPlayground({ endpoint: '/graphql' }))
+
 //Затем, чтобы настроить серверы HTTP и WebSocket, нам нужно создать http.Server. 
 //Сделайте это, передав ваше приложение Express функции createServer, которую мы импортировали из 
 //модуля http:
@@ -81,7 +83,7 @@ async function startServer() {
       await server.start()
 
       //сделать наше приложение Express как промежуточное ПО в нашем сервере (передать app в сервер)
-      server.applyMiddleware({ app, path: '/' })
+      server.applyMiddleware({ app })
 
       //создать сервер для подписки. будет использоваться посредством Вебсокета из пакета subscriptions-transport-ws'
       SubscriptionServer.create(
