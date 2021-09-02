@@ -37,9 +37,8 @@ const pubSub = new PubSub()
 const app = express()
 
 //
-app.use(cors())
-
-
+// app.use(cors())
+app.use(cors({ origin: 'https://merng-application.netlify.app/', credentials: true }))
 
 //Затем, чтобы настроить серверы HTTP и WebSocket, нам нужно создать http.Server. 
 //Сделайте это, передав ваше приложение Express функции createServer, которую мы импортировали из 
@@ -83,7 +82,10 @@ async function startServer() {
       await server.start()
 
       //сделать наше приложение Express как промежуточное ПО в нашем сервере (передать app в сервер)
-      server.applyMiddleware({ app, cors: false })
+      server.applyMiddleware({ 
+         app, 
+         cors: false 
+      })
 
       //создать сервер для подписки. будет использоваться посредством Вебсокета из пакета subscriptions-transport-ws'
       SubscriptionServer.create(
