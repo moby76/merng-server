@@ -67,6 +67,7 @@ async function startServer() {
       //создаём экземпляр аполло-сервера 
       //и указываем какие сущьности он будет обрабатывать
       const server = new ApolloServer({
+         cors: false,
          schema,// (typeDefs, resolvers)
          plugins: [{
             async serverWillStart() {//плагин закрывающий соединение по вебсокету при отключении основного сервера
@@ -100,6 +101,7 @@ async function startServer() {
          },{ 
             server: httpServer, //созданный раннее сервер для участия приложения в подписках const httpServer = createServer(app)
             path: server.graphqlPath, //путь в котором будет проходить сокет - наш основной сервер: const server = new ApolloServer
+            cors: false,
          }
        );
 
