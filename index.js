@@ -38,7 +38,10 @@ const app = express()
 
 //
 // app.use(cors())
-app.use(cors())
+app.use(cors({
+   origin: true,
+	credentials: true,
+}))
 
 //Затем, чтобы настроить серверы HTTP и WebSocket, нам нужно создать http.Server. 
 //Сделайте это, передав ваше приложение Express функции createServer, которую мы импортировали из 
