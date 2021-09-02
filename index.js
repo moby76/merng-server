@@ -3,7 +3,7 @@ const mongoose = require('mongoose')//для связи с mongodb
 const { ApolloServer } = require('apollo-server-express')//подключаем Аполло сервер, класс PubSub для реализации подписок
 const { Promise } = require('mongoose')
 const { ApolloServerPluginLandingPageGraphQLPlayground } = require('apollo-server-core')
-const cors = require('cors')
+// const cors = require('cors')
 
 //для управления подписками
 const { createServer } = require ('http')
@@ -38,10 +38,10 @@ const app = express()
 
 //
 // app.use(cors())
-app.use(cors({
-   origin: true,
-	credentials: true,
-}))
+// app.use(cors({
+//    origin: true,
+// 	credentials: true,
+// }))
 
 //Затем, чтобы настроить серверы HTTP и WebSocket, нам нужно создать http.Server. 
 //Сделайте это, передав ваше приложение Express функции createServer, которую мы импортировали из 
@@ -97,7 +97,8 @@ async function startServer() {
          { 
             schema,// (typeDefs, resolvers)
             execute, 
-            subscribe// передать функцию подписки
+            subscribe,// передать функцию подписки
+            cors: false,
          },{ 
             server: httpServer, //созданный раннее сервер для участия приложения в подписках const httpServer = createServer(app)
             path: server.graphqlPath, //путь в котором будет проходить сокет - наш основной сервер: const server = new ApolloServer
