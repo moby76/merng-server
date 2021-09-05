@@ -10,7 +10,7 @@ const { createServer } = require('http')
 const { execute, subscribe } = require('graphql')
 const { SubscriptionServer } = require('subscriptions-transport-ws')
 const { makeExecutableSchema } = require('@graphql-tools/schema')
-// const { PubSub } = require('graphql-subscriptions')
+const { PubSub } = require('graphql-subscriptions')
 
 // const config = require('config')
 //получаем порт из config и если он не определён в конфиге - пусть по умолчанию он 5000
@@ -35,7 +35,7 @@ const schema = makeExecutableSchema({
 })
 
 //создаём новый экземпляр/инстанс от класса PubSub, который передадим в контекст сервера для использования в резольверах
-// const pubSub = new PubSub()
+const pubSub = new PubSub()
 
 
 //
@@ -69,7 +69,7 @@ async function startServer() {
          // cors: false,
          schema,// (typeDefs, resolvers)
          plugins: [
-            // ApolloServerPluginLandingPageGraphQLPlayground(),
+            ApolloServerPluginLandingPageGraphQLPlayground({ footer: false }),
             {
                async serverWillStart() {//плагин закрывающий соединение по вебсокету при отключении основного сервера
                   return {
@@ -79,14 +79,13 @@ async function startServer() {
                   };
                }
             }],
-            graphiql: true,
          //сущьность контекста: запросы, подписки
          context: ({ req, res }) => ({
             req,
             res,
             Post,
             User,
-            // pubSub
+            pubSub//
          })
       })
 
@@ -106,7 +105,7 @@ async function startServer() {
       //Затем, чтобы настроить серверы HTTP и WebSocket, нам нужно создать http.Server. 
       //Сделайте это, передав ваше приложение Express функции createServer, которую мы импортировали из 
       //модуля http:
-      const httpServer = createServer(app)
+      const httpServer = createServer(app, cors())
 
       //создать сервер для подписки. будет использоваться посредством Вебсокета из пакета subscriptions-transport-ws'
       SubscriptionServer.create(

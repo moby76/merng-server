@@ -1,4 +1,4 @@
-const Post = require('../../models/Post')//получим модель поста
+// const Post = require('../../models/Post')//получим модель поста
 
 // получим утилиту проверяющую разрешение редактирования постов
 const checkAuth = require('../../utils/check-auth')
@@ -29,7 +29,7 @@ module.exports = {
             }
             //если поле body не пустое то:
                //найти пост по id
-            const post = await Post.findById(postId)
+            const post = await context.Post.findById(postId)
 
             // если пост есть то: 
             if(post){
@@ -52,7 +52,7 @@ module.exports = {
          const { userName } = checkAuth(context)//получим имя пользователя из контекста 
 
          //найти пост по id
-         const post = await Post.findById(postId)
+         const post = await context.Post.findById(postId)
 
          //если пост существует то
          if(post){

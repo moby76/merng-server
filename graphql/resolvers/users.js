@@ -7,10 +7,11 @@ const { UserInputError } = require('apollo-server-express')//подключае�
 //получаем валидатор validateRegisterInput и validateLoginInput из validators
 const { validateRegisterInput, validateLoginInput } = require('../../utils/validators')
 
+//получить секретный ключ из 
 const { SECRET } = require('../../config/default')
 
 //получаем модель пользователя из папки с моделями
-const User = require('../../models/User')
+// const User = require('../../models/User')
 
 //сгенерируем токен для пользователя
 function generateToken(user) {
@@ -27,9 +28,20 @@ function generateToken(user) {
 
 //создать мутации для пользователя
 module.exports = {
+   Query: {
+      async getUsers(_, __, { User }){
+         try {
+            //получит все посты и отсортировать их по дате создания(по убыванию (-1))
+            const users = await User.find({}).sort({ createdAt: -1 })
+            return users
+         } catch (error) {
+            throw new Error(error)
+         }
+      }
+   },
    Mutation: {//асинхронная ф-ция
       //мутация для входа в систему
-      async login(_, { userName, password }) {
+      async login(_, { userName, password }, { User }) {
          //Выполнить проверку правильности заполнения формы входа - валидацию данных
          const { errors, valid } = validateLoginInput(userName, password)//получить значения из валидатора и применить их к :
 
@@ -65,8 +77,7 @@ module.exports = {
       },
 
       //мутация для регистрации пользователя
-      async register(_, { registerInput: { userName, email, password, confirmPassword } }
-      ) {
+      async register(_, { registerInput: { userName, email, password, confirmPassword } }, { User }){
          //Выполнить проверку правильности заполнения формы регистрации - валидацию данных
          const { valid, errors } = validateRegisterInput(//получить значения из валидатора и применить их к :
             userName,

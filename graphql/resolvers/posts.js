@@ -1,8 +1,11 @@
 //Разрешители/распознаватели для Постов
 // -- Используются методы mongoose (https://mongoosejs.com/docs/api/model.html)
 
-//получим модель для постов из папки с моделями
-const Post = require('../../models/Post')
+//получить подкласс PubSub для управления подписками из пакета graphql-subscriptions
+const { PubSub } = require('graphql-subscriptions')
+
+//создать инстанс от подкласса PubSub
+const pubSub = new PubSub()
 
 // получим утилиту проверяющую разрешение редактирования постов
 const checkAuth = require('../../utils/check-auth')
@@ -16,10 +19,10 @@ const { AuthenticationError, UserInputError } = require('apollo-server-express')
 
 //создаём резольверы (функции-преобразователи) согласно названиям мутаций в файле typeDefs
 module.exports = {
-   
+   //Запросы   
    Query: {
       //реализация запроса getPosts(получения ВСЕХ постов)
-      async getPosts() {
+      async getPosts(_, __, { Post }) {
          try {
             //получит все посты и отсортировать их по дате создания(по убыванию (-1))
             const posts = await Post.find({}).sort({ createdAt: -1 })
@@ -30,7 +33,7 @@ module.exports = {
       },
 
       //реализация запроса getPost(получения ОДНОГО поста)
-      async getPost(_, { postId }) {
+      async getPost(_, { postId }, { Post }) {
          try {
             //создать константу нахождения поста по id . Метод findById библиотеки mongoose
             const post = await Post.findById(postId)
@@ -49,20 +52,19 @@ module.exports = {
    //добавляем мутации для постов
    Mutation: {
       //Создать мутацию для создания поста - возможность добавления поста пользователем
-      async createPost(_, { postInput: { body }}, context) {
+      async createPost(_, { postInput: { body } }, context) {
          //создать константу = утилитой проверки соответствия пользователя с передачей в неё контекста из аполло сервера в качестве аргумента параметра 
-         const user = checkAuth(context)
-         // console.log(user)
+         const user = checkAuth(context)// console.log(user)
 
          //реализуем проверку
-         if(body.trim() === ''){//если body(без пробелов в начале и конце) - это пустая строка то:
+         if (body.trim() === '') {//если body(без пробелов в начале и конце) - это пустая строка то:
             throw new Error('Post-body must not be empty')//тело поста не должно быть пустым
          }
 
          //если проверка пройдена успешно то:
          //создать новый пост используя модель описанную в файле Post(в моделях)
          //передав туда только те параметры на которые будет применено воздействие
-         const newPost = await new Post({
+         const newPost = await new context.Post({
             body: body,//тело поста
             user: user.id,//id пользователя для ссылочного поля user(будет определяться по ID пользователя из утилиты checkAuth)
             userName: user.userName,//имя пользователя присваивается от имени пользователя полученного из утилиты checkAuth
@@ -73,19 +75,19 @@ module.exports = {
          const post = await newPost.save()
 
          //разместим триггер для срабатывания подписки которую создали для реакции на создание новых постов
-            //для этого нужно получить экземпляр PubSub из контекста(context) 
-               //и опубликовать событие с помощью метода publish и вернуть нагрузку - сам новый пост
-               context.pubSub.publish('NEW_POST', {
-                  //нагрузка
-                  newPost: post
-                })
+         //для этого нужно получить экземпляр PubSub из контекста(context) 
+         //и опубликовать событие с помощью метода publish и вернуть нагрузку - сам новый пост
+         pubSub.publish('NEW_POST', {
+            //нагрузка
+            newPost: post//newPost - название подписки в схеме graphql(typeDefs)
+         })
 
          //и в конце вернуть этот пост
          return post
       },
       //Создать мутацию для обновления поста
-      async updatePost(_, {postId, body}, context, info){       
-         const post = await Post.findByIdAndUpdate( postId, {body}, {new: true})
+      async updatePost(_, { postId, body }, context, info) {
+         const post = await context.Post.findByIdAndUpdate(postId, { body }, { new: true })
          return post
          // const {userName} = checkAuth(context)
          // try {
@@ -98,22 +100,22 @@ module.exports = {
          //    throw new Error(err)
          // }
          // const postUpdate = 
-         
+
       },
       //Создать мутацию для удаления поста
       async deletePost(_, { postId }, context) {
          //
-         const {userName} = checkAuth(context)
+         const { userName } = checkAuth(context)
 
          //пост может удалять только пользователь создавший его
          try {
-            const post = await Post.findById(postId)
+            const post = await context.Post.findById(postId)
             //должно быть выполнено условие что совпадают имя пользователя и имя пользователя создавшего пост
             if (userName === post.userName) {
                //тогда выполняем удаление
                await post.remove()// или post.delete()
                //и выводим сообщение об успешном удалении поста
-               return 'Post deleted successfully'
+               return `Post ${post.body} deleted successfully`
             } else {//иначе если пользователь не тот который создал пост вернём ошибку
                throw new AuthenticationError('Action not allowed')
             }
@@ -158,14 +160,13 @@ module.exports = {
    // создаём подписки для постов
    Subscription: {
       //подписка будет в виде объекта
-         //преобразователи полей подписки - это объекты, которые определяют функцию подписки:
+      //преобразователи полей подписки - это объекты, которые определяют функцию подписки:
 
-         //создать подписку newPost
-      newPost:{
+      //резольвер для подписки newPost
+      newPost: {
          // Функция подписки (subscribe) должна возвращать объект типа AsyncIterator, стандартный интерфейс для перебора асинхронных результатов.
          //параметры parent и аргументы в данном случае не понадобятся. только экземпляр от PubSub переданный через контеккст Аполло сервера
-         subscribe: (_, __, { pubSub }) => pubSub.asyncIterator('NEW_POST')//создан новый тип подписки с названием NEW_POST
+         subscribe: () => pubSub.asyncIterator('NEW_POST')//создан новый тип подписки с названием NEW_POST
       }
    }
-
 }

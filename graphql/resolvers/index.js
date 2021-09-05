@@ -17,7 +17,8 @@ module.exports = {
       }
    },
    Query: {//пробросим запросы
-      ...postsResolvers.Query//запрос в постах
+      ...postsResolvers.Query,//запрос в постах
+      ...usersResolvers.Query
    },
    Mutation: {//пробросим мутации
       ...usersResolvers.Mutation,
