@@ -38,7 +38,7 @@ const schema = makeExecutableSchema({
 // const pubSub = new PubSub()
 
 const corsOptions = {
-   origin: true,
+   origin: *,
    credentials: true,
 }
 
