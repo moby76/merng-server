@@ -38,7 +38,7 @@ const schema = makeExecutableSchema({
 // const pubSub = new PubSub()
 
 const corsOptions = {
-   origin: 'https://merng-application.netlify.app/',
+   origin: '<https://merng-application.netlify.app/>',
    credentials: true,
 }
 
