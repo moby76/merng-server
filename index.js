@@ -37,9 +37,13 @@ const schema = makeExecutableSchema({
 //создаём новый экземпляр/инстанс от класса PubSub, который передадим в контекст сервера для использования в резольверах
 // const pubSub = new PubSub()
 
+const corsOptions = {
+   origin: true,
+   credentials: true,
+}
 
 //
-// app.use(cors())
+app.use(cors(corsOptions))
 // app.use(cors({
 //    origin: true,
 // 	credentials: true,
@@ -79,7 +83,7 @@ async function startServer() {
                   };
                }
             }],
-            graphiql: true,
+         graphiql: true,
          //сущьность контекста: запросы, подписки
          context: ({ req, res }) => ({
             req,
